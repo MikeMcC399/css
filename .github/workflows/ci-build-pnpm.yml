@@ -1,0 +1,41 @@
+name: CI Build pnpm install
+on:
+    workflow_dispatch:
+jobs:
+    npm-build:
+        name: Build tarball
+        runs-on: ubuntu-latest
+        outputs:
+            version: ${{ steps.get_version.outputs.version }}
+        steps:
+            - uses: actions/checkout@v4
+            - run: npm pack
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: build.zip
+                  path: eslint-css-*.tgz
+                  retention-days: 1
+            - name: Get version
+              id: get_version
+              run: echo "version=$(jq -r '.version' package.json)" >> "$GITHUB_OUTPUT"
+    pnpm-install:
+        name: Install with pnpm
+        needs: npm-build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/download-artifact@v4
+              with:
+                  name: build.zip
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.14.0 # minimum for Corepack
+            - name: Enable pnpm
+              run: |
+                  corepack enable pnpm
+                  corepack use pnpm@latest
+                  cat > .npmrc <<EOT
+                  auto-install-peers=true
+                  node-linker=hoisted
+                  EOT
+                  pnpm add ./eslint-css-${{ needs.npm-build.outputs.version }}.tgz
