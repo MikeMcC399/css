@@ -1,0 +1,22 @@
+name: CI-pnpm
+on:
+    workflow_dispatch:
+jobs:
+    pnpm-install:
+        name: Install with pnpm
+        runs-on: ubuntu-latest
+        steps:
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22.14.0
+            - name: Enable pnpm
+              run: |
+                  corepack enable pnpm
+                  cd $(mktemp -d)
+                  corepack use pnpm@latest
+                  cat > .npmrc <<EOT
+                  auto-install-peers=true
+                  node-linker=hoisted
+                  EOT
+                  pnpm add @eslint/css@0.4.0
