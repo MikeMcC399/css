@@ -1,0 +1,31 @@
+name: Deno CI
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [windows-latest, macos-latest, ubuntu-latest]
+                deno: [latest]
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Deno ${{ matrix.deno }} ${{ matrix.os }}
+              uses: denoland/setup-deno@v2
+              with:
+                  deno-version: ${{ matrix.deno }}
+            - name: Deno install
+              run: deno add jsr:@eslint/css
+            - name: Mocha tests
+              run: deno run -A test
