@@ -79,6 +79,7 @@ jobs:
                   node-version: "lts/*"
             - name: yarn add
               run: |
+                  npm install -g corepack@latest
                   corepack enable yarn
                   corepack use yarn@latest
                   yarn init -p
@@ -99,6 +100,7 @@ jobs:
                   node-version: "lts/*"
             - name: pnpm add
               run: |
+                  npm install -g corepack@latest
                   corepack enable pnpm
                   corepack use pnpm@latest
                   cat > .npmrc <<EOT
